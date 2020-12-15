@@ -12,6 +12,8 @@ public class GameContext
 
     public Timer GameLoopTimer = new(interval: 30);
 
+    public int Score;
+
     private Random Random = new();
 
     public GameContext()
@@ -27,6 +29,16 @@ public class GameContext
     {
         this.SnowFlakeRect.Y += 10;
         if (this.SnowFlakeRect.Y > this.GameAreaSize.Height) ResetSnowFlakePos();
+
+        var deltaH = this.SnowManRect.X - this.SnowFlakeRect.X;
+        var deltaV = this.SnowManRect.Y - this.SnowFlakeRect.Y;
+        var distance = Math.Sqrt(Math.Pow(deltaH, 2) + Math.Pow(deltaV, 2));
+
+        if (distance < (this.SnowManRect.Height + this.SnowFlakeRect.Height) / 2 * 0.6)
+        {
+            ResetSnowFlakePos();
+            this.Score++;
+        }
     }
 
     private void ResetSnowFlakePos()
