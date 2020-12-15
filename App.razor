@@ -1,5 +1,9 @@
 <div
     style="width: @(Context.GameAreaSize.Width)px; height: @(Context.GameAreaSize.Height)px; background-color: black;position: relative;">
+
+    <!-- Snow Flake -->
+    <img src="assets/snowflake.svg"
+        style="left:@(Context.SnowFlakeRect.X)px; top:@(Context.SnowFlakeRect.Y)px; width:@(Context.SnowFlakeRect.Width)px; height:@(Context.SnowFlakeRect.Height); position:absolute;" />
 </div>
 
 @code {
