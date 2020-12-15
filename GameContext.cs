@@ -10,8 +10,11 @@ public class GameContext
 
     public Timer GameLoopTimer = new(interval: 30);
 
+    private Random Random = new();
+
     public GameContext()
     {
+        this.ResetSnowFlakePos();
         this.GameLoopTimer.Elapsed += GameLoopTimer_Elapsed;
         this.GameLoopTimer.Start();
     }
@@ -25,5 +28,6 @@ public class GameContext
     private void ResetSnowFlakePos()
     {
         this.SnowFlakeRect.Y = -this.SnowFlakeRect.Height;
+        this.SnowFlakeRect.X = Random.Next(minValue: 0, maxValue: this.GameAreaSize.Width - this.SnowFlakeRect.Width);
     }
 }
