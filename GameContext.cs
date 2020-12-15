@@ -40,4 +40,15 @@ public class GameContext
         this.SnowManRect.X = (this.GameAreaSize.Width - this.SnowManRect.Width) / 2;
         this.SnowManRect.Y = this.GameAreaSize.Height - this.SnowManRect.Height;
     }
+
+    public void MoveSnowManToLeft()
+    {
+        this.SnowManRect.X = Math.Max(0, this.SnowManRect.X - 5);
+    }
+
+    public void MoveSnowManToRight()
+    {
+        var maxSnowManX = this.GameAreaSize.Width - this.SnowManRect.Width;
+        this.SnowManRect.X = Math.Min(this.SnowManRect.X + 5, maxSnowManX);
+    }
 }

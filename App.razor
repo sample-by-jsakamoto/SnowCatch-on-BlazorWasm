@@ -1,3 +1,7 @@
+@using Toolbelt.Blazor.HotKeys
+@inject HotKeys HotKeys
+@implements IDisposable
+
 <div
     style="width: @(Context.GameAreaSize.Width)px; height: @(Context.GameAreaSize.Height)px; background-color: black;position: relative;">
 
@@ -13,13 +17,24 @@
 @code {
     private GameContext Context = new();
 
+    private HotKeysContext HotKeysContext;
+
     protected override void OnInitialized()
     {
         this.Context.GameLoopTimer.Elapsed += GameLoopTimer_Elapsed;
+        this.HotKeysContext = this.HotKeys.CreateContext();
+        this.HotKeysContext.Add(ModKeys.None, Keys.Left, () => this.Context.MoveSnowManToLeft());
+        this.HotKeysContext.Add(ModKeys.None, Keys.Right, () => this.Context.MoveSnowManToRight());
     }
 
     private void GameLoopTimer_Elapsed(object sender, EventArgs e)
     {
         this.StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        this.Context.GameLoopTimer.Elapsed -= GameLoopTimer_Elapsed;
+        this.HotKeysContext.Dispose();
     }
 }
