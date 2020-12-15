@@ -8,4 +8,14 @@
 
 @code {
     private GameContext Context = new();
+
+    protected override void OnInitialized()
+    {
+        this.Context.GameLoopTimer.Elapsed += GameLoopTimer_Elapsed;
+    }
+
+    private void GameLoopTimer_Elapsed(object sender, EventArgs e)
+    {
+        this.StateHasChanged();
+    }
 }
