@@ -1,6 +1,4 @@
-using System;
 using System.Drawing;
-using System.Timers;
 
 public class GameContext
 {
@@ -10,7 +8,7 @@ public class GameContext
 
     public Rectangle SnowManRect = new(x: 0, y: 0, width: 64, height: 64);
 
-    public Timer GameLoopTimer = new(interval: 30);
+    public System.Timers.Timer GameLoopTimer = new(interval: 30);
 
     public int Score;
 
