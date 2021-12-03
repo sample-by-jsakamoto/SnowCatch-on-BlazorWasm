@@ -1,5 +1,6 @@
 @using Toolbelt.Blazor.HotKeys
 @inject HotKeys HotKeys
+@inject Toolbelt.Blazor.Gamepad.GamepadList GamepadList
 @implements IDisposable
 
 <div
@@ -32,8 +33,16 @@
         this.HotKeysContext.Add(ModKeys.None, Keys.Right, () => this.Context.MoveSnowManToRight());
     }
 
-    private void GameLoopTimer_Elapsed(object sender, EventArgs e)
+    private async void GameLoopTimer_Elapsed(object sender, EventArgs e)
     {
+        var gamepads = await this.GamepadList.GetGamepadsAsync();
+        var gamepad = gamepads.FirstOrDefault(g => g.Axes?.Count >= 2);
+        if (gamepad != null)
+        {
+            if (gamepad.Axes[0] < -0.8) this.Context.MoveSnowManToLeft();
+            if (gamepad.Axes[0] > 0.8) this.Context.MoveSnowManToRight();
+        }
+
         this.StateHasChanged();
     }
 
