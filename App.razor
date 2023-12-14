@@ -1,7 +1,8 @@
-@using Toolbelt.Blazor.HotKeys2
-@inject HotKeys HotKeys
-@inject Toolbelt.Blazor.Gamepad.GamepadList GamepadList
 @implements IDisposable
+
+@inject HotKeys HotKeys
+@inject GamepadList GamepadList
+@inject SpeechRecognition SpeechRecognition
 
 <div
     style="width: @(Context.GameAreaSize.Width)px; height: @(Context.GameAreaSize.Height)px; background-color: black;position: relative;">
@@ -19,18 +20,36 @@
     <img src="assets/snowman.svg"
         style="left:@(Context.SnowManRect.X)px; top:@(Context.SnowManRect.Y)px; width:@(Context.SnowManRect.Width)px; height:@(Context.SnowManRect.Height); position:absolute;" />
 </div>
+<div
+    style="width: @(Context.GameAreaSize.Width)px; height: 72px; background-color: black; display:flex; align-items:center; justify-content: space-evenly;">
+    <button @onclick="StartStopListening"
+        style="opacity:@(_voiceCommandState == VoiceCommand.None ? "0.5": "1"); width:52px; height:52px; background: transparent; outline: none; border: solid 3px #fff; border-radius: 26px;">
+        <img src="assets/microphone.svg" style="width:32px; height:32px;" />
+    </button>
+</div>
 
 @code {
     private GameContext Context = new();
 
     private HotKeysContext HotKeysContext;
 
+    private enum VoiceCommand { None, Stop, Left, Right }
+
+    private VoiceCommand _voiceCommandState = VoiceCommand.None;
+
     protected override void OnInitialized()
     {
         this.Context.GameLoopTimer.Elapsed += GameLoopTimer_Elapsed;
-        this.HotKeysContext = this.HotKeys.CreateContext();
-        this.HotKeysContext.Add(Code.ArrowLeft, this.Context.MoveSnowManToLeft);
-        this.HotKeysContext.Add(Code.ArrowRight, this.Context.MoveSnowManToRight);
+
+        this.HotKeysContext = this.HotKeys.CreateContext()
+        .Add(Code.ArrowLeft, this.Context.MoveSnowManToLeft)
+        .Add(Code.ArrowRight, this.Context.MoveSnowManToRight);
+
+        this.SpeechRecognition.Lang = "en-US";
+        this.SpeechRecognition.InterimResults = true;
+        this.SpeechRecognition.Continuous = true;
+        this.SpeechRecognition.Result += OnSpeechRecognized;
+        this.SpeechRecognition.End += OnEndSpeechRecognition;
     }
 
     private async void GameLoopTimer_Elapsed(object sender, EventArgs e)
@@ -43,11 +62,61 @@
             if (gamepad.Axes[0] > 0.8) this.Context.MoveSnowManToRight();
         }
 
+        if (_voiceCommandState == VoiceCommand.Left) this.Context.MoveSnowManToLeft();
+        if (_voiceCommandState == VoiceCommand.Right) this.Context.MoveSnowManToRight();
+
+        this.StateHasChanged();
+    }
+
+    private async Task StartStopListening()
+    {
+        if (_voiceCommandState == VoiceCommand.None)
+        {
+            _voiceCommandState = VoiceCommand.Stop;
+            await this.SpeechRecognition.StartAsync();
+            this.Context.Interval = GameContext.Speed.Slow;
+        }
+        else
+        {
+            _voiceCommandState = VoiceCommand.None;
+            await this.SpeechRecognition.StopAsync();
+            this.Context.Interval = GameContext.Speed.Normal;
+        }
+    }
+
+    private void OnSpeechRecognized(object sender, SpeechRecognitionEventArgs args)
+    {
+        var result = args.Results[args.ResultIndex];
+        var item = result.Items.LastOrDefault();
+        if (item == null) return;
+
+        var terms = item.Transcript.Split(new[] { ' ', ',', '.' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var term in terms)
+        {
+            _voiceCommandState = term.ToLower() switch
+            {
+                "stop" => VoiceCommand.Stop,
+                "left" => VoiceCommand.Left,
+                "lift" => VoiceCommand.Left,
+                "right" => VoiceCommand.Right,
+                "just" => VoiceCommand.Right,
+                _ => _voiceCommandState
+            };
+            Console.WriteLine($"{term} => {_voiceCommandState}");
+        }
+    }
+
+    private void OnEndSpeechRecognition(object sender, EventArgs args)
+    {
+        _voiceCommandState = VoiceCommand.None;
+        this.Context.Interval = GameContext.Speed.Normal;
         this.StateHasChanged();
     }
 
     public void Dispose()
     {
+        this.SpeechRecognition.Result -= OnSpeechRecognized;
+        this.SpeechRecognition.End -= OnEndSpeechRecognition;
         this.Context.GameLoopTimer.Elapsed -= GameLoopTimer_Elapsed;
         this.HotKeysContext.Dispose();
     }

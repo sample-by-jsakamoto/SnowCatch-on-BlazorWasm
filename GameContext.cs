@@ -2,17 +2,29 @@ using System.Drawing;
 
 public class GameContext
 {
+    public static class Speed
+    {
+        public const double Slow = 100;
+        public const double Normal = 30;
+    }
+
     public Size GameAreaSize = new(width: 320, height: 480);
 
     public Rectangle SnowFlakeRect = new(x: 0, y: 0, width: 48, height: 48);
 
     public Rectangle SnowManRect = new(x: 0, y: 0, width: 64, height: 64);
 
-    public System.Timers.Timer GameLoopTimer = new(interval: 30);
+    public System.Timers.Timer GameLoopTimer = new(interval: Speed.Normal);
 
     public int Score;
 
     private Random Random = new();
+
+    public double Interval
+    {
+        get => this.GameLoopTimer.Interval;
+        set => this.GameLoopTimer.Interval = value;
+    }
 
     public GameContext()
     {

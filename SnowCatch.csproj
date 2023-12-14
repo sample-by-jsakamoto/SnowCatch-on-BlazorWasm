@@ -15,6 +15,7 @@
     <PackageReference Include="System.Drawing.Primitives" Version="4.3.0" />
     <PackageReference Include="Toolbelt.Blazor.Gamepad" Version="9.0.0" />
     <PackageReference Include="Toolbelt.Blazor.HotKeys2" Version="3.2.1" />
+    <PackageReference Include="Toolbelt.Blazor.SpeechRecognition" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
