@@ -1,4 +1,4 @@
-@using Toolbelt.Blazor.HotKeys
+@using Toolbelt.Blazor.HotKeys2
 @inject HotKeys HotKeys
 @inject Toolbelt.Blazor.Gamepad.GamepadList GamepadList
 @implements IDisposable
@@ -29,8 +29,8 @@
     {
         this.Context.GameLoopTimer.Elapsed += GameLoopTimer_Elapsed;
         this.HotKeysContext = this.HotKeys.CreateContext();
-        this.HotKeysContext.Add(ModKeys.None, Keys.Left, () => this.Context.MoveSnowManToLeft());
-        this.HotKeysContext.Add(ModKeys.None, Keys.Right, () => this.Context.MoveSnowManToRight());
+        this.HotKeysContext.Add(Code.ArrowLeft, this.Context.MoveSnowManToLeft);
+        this.HotKeysContext.Add(Code.ArrowRight, this.Context.MoveSnowManToRight);
     }
 
     private async void GameLoopTimer_Elapsed(object sender, EventArgs e)
